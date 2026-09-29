@@ -28,7 +28,7 @@ fabric-access-ai-dev/
 └── README.md
 ```
 
-One instance = one workflow. `rbac-config` still starts from Jira. `rbac-config-pr-label` watches open GitHub PRs labeled `dev-bot`, creates a memory-server task, and pushes commits / review suggestions onto that same PR. It requires a bracketed Jira key in each PR title, creates and links a Jira Task when a labeled PR has no key, and updates that Jira issue to **Release Pending** when the PR merges.
+One instance = one workflow. `rbac-config` still starts from Jira. Every GitHub PR it creates must use `[PROJECT-12345]: <title>`. The `PR title format` check validates bot-authored and `dev-bot`-labeled PRs when opened, edited, reopened, synchronized, or labeled. `rbac-config-pr-label` also validates watched PRs in preflight, creates a memory-server task, and pushes commits / review suggestions onto that same PR. It creates and links a Jira Task when a labeled PR has no key, normalizes the title to the required format before doing PR work, and updates that Jira issue to **Release Pending** when the PR merges.
 
 To run the PR-label instance, deploy a **second** bot with the same image. Do not copy the Jira bot's `BOT_LABEL` or `BOT_INSTANCE_ID`.
 

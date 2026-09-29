@@ -21,6 +21,7 @@ TASK_KEY_PREFIX = "pr-label:"
 # GitHub PR label — independent of BOT_LABEL (that env is the Jira ticket label).
 PR_LABEL = os.environ.get("BOT_PR_LABEL") or "dev-bot"
 JIRA_TITLE_RE = re.compile(r"\[([A-Z][A-Z0-9]+-\d+)\]")
+PR_TITLE_FORMAT_RE = re.compile(r"\[[A-Z][A-Z0-9]*-\d+\]: \S(?:.*\S)?")
 _GH_PR_JSON = (
     "number,title,url,headRefName,author,isCrossRepository,maintainerCanModify"
 )
@@ -42,6 +43,11 @@ def jira_key_from_title(title: str) -> str | None:
     """Return the bracketed Jira key required by the PR-label workflow."""
     match = JIRA_TITLE_RE.search(title or "")
     return match.group(1) if match else None
+
+
+def is_valid_pr_title(title: str) -> bool:
+    """Return whether the title follows `[PROJECT-12345]: <title>`."""
+    return bool(PR_TITLE_FORMAT_RE.fullmatch(title or ""))
 
 
 def is_tracked(key: str, tasks: list[dict]) -> bool:
@@ -162,15 +168,24 @@ def main() -> None:
                 tracked += 1
                 continue
             fork = bool(pr.get("isCrossRepository"))
+            title = pr.get("title", "")
+            title_format_valid = is_valid_pr_title(title)
+            if not title_format_valid:
+                print(
+                    f"  INVALID PR title {nwo}#{number}: expected "
+                    "[PROJECT-12345]: <title>",
+                    file=sys.stderr,
+                )
             candidates.append(
                 {
                     "repo": nwo,
                     "number": number,
-                    "title": pr.get("title", ""),
+                    "title": title,
+                    "title_format_valid": title_format_valid,
                     "url": pr.get("url", ""),
                     "branch": pr.get("headRefName", ""),
                     "author": _author_login(pr),
-                    "jira_key": jira_key_from_title(pr.get("title", "")),
+                    "jira_key": jira_key_from_title(title),
                     "is_fork": fork,
                     "can_push": can_push(pr),
                     "task_key": key,
