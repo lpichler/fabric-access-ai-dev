@@ -70,7 +70,7 @@ Review-level rules:
 - If --focus is supplied, it takes precedence over --level and selects only the named dimensions, regardless of applicability or level.
 - If --level names an unknown preset, stop and list the configured preset names.
 
-Light is the cost-saving preset and runs a small baseline review. Medium is the balanced default. High maximizes coverage and usually uses more reviewer agents, so it generally costs more.
+Light is the cost-saving preset and runs a small baseline review. Medium is the balanced preset. High maximizes coverage; it is the configured default for this bot and usually uses more reviewer agents, so it generally costs more.
 
 ### 2.2 Print Applicability Table
 
